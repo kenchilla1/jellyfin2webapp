@@ -4,7 +4,9 @@ const serverSelect = document.getElementById('jellyfin-server');
 const serverAddressPreview = document.getElementById('server-address-preview');
 const localModeButton = document.getElementById('local-mode');
 const remoteModeButton = document.getElementById('remote-mode');
+const usernameInput = document.getElementById('username');
 let connectionMode = 'remote';
+let defaultUsername = 'admin';
 
 const jellyfinServers = {
     local: {
@@ -22,6 +24,9 @@ function updateServerSelection(mode = connectionMode) {
     localModeButton.setAttribute('aria-pressed', String(mode === 'local'));
     remoteModeButton.setAttribute('aria-pressed', String(mode === 'remote'));
     serverAddressPreview.textContent = jellyfinServers[mode][serverSelect.value];
+    const nextDefaultUsername = mode === 'local' && serverSelect.value === 'porn' ? 'kenny' : 'admin';
+    if (usernameInput.value === defaultUsername) usernameInput.value = nextDefaultUsername;
+    defaultUsername = nextDefaultUsername;
 }
 
 serverSelect.addEventListener('change', () => updateServerSelection());
@@ -33,7 +38,7 @@ authForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const jellyfinUrl = jellyfinServers[connectionMode][serverSelect.value].replace(/\/+$/, '');
-    const username = document.getElementById('username').value.trim();
+    const username = usernameInput.value.trim();
     const password = document.getElementById('password').value;
     const submitButton = authForm.querySelector('button[type="submit"]');
 
