@@ -31,7 +31,6 @@ window.__onGCastApiAvailable = (isAvailable) => {
         receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
     });
-    document.getElementById('cast-launcher').hidden = false;
     castContext.addEventListener(castFramework.CastContextEventType.SESSION_STATE_CHANGED, (event) => {
         if ([castFramework.SessionState.SESSION_STARTED, castFramework.SessionState.SESSION_RESUMED].includes(event.sessionState)) {
             castCurrentMedia();
@@ -51,6 +50,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         event.stopPropagation();
         if (currentMedia) toggleFavorite(currentMedia, event.currentTarget);
     });
+    document.getElementById('cast-button').addEventListener('click', requestCastPlayback);
     setSortOrder('Ascending');
     moreButton.addEventListener('click', () => loadContents(false));
     sortBySelect.addEventListener('change', () => loadContents(true));
@@ -509,6 +509,7 @@ async function castCurrentMedia() {
     if (!session || !currentMedia) return;
 
     const player = document.getElementById('media-player');
+    const castStatus = document.getElementById('cast-status');
     const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl(currentMedia), 'video/mp4');
     mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED;
     const metadata = new chrome.cast.media.GenericMediaMetadata();
@@ -521,9 +522,40 @@ async function castCurrentMedia() {
     try {
         await session.loadMedia(request);
         player.pause();
+        castStatus.hidden = true;
+        castStatus.textContent = '';
     } catch {
-        statusMessage.textContent = 'Could not cast this film. Check that the TV can reach the selected Jellyfin server.';
-        statusMessage.classList.add('error');
+        castStatus.textContent = 'Could not cast this film. Check that the TV can reach the selected Jellyfin server.';
+        castStatus.hidden = false;
+    }
+}
+
+async function requestCastPlayback() {
+    const player = document.getElementById('media-player');
+    const castStatus = document.getElementById('cast-status');
+    castStatus.hidden = true;
+    castStatus.textContent = '';
+
+    try {
+        if (castContext) {
+            if (castContext.getCurrentSession()) await castCurrentMedia();
+            else await castContext.requestSession();
+            return;
+        }
+        if (typeof player.webkitShowPlaybackTargetPicker === 'function') {
+            player.webkitShowPlaybackTargetPicker();
+            return;
+        }
+        if (player.remote && typeof player.remote.prompt === 'function') {
+            await player.remote.prompt();
+            return;
+        }
+        castStatus.textContent = 'Casting is unavailable in this browser. Try Chrome with Chromecast or Safari with AirPlay.';
+        castStatus.hidden = false;
+    } catch (error) {
+        if (error.name === 'NotAllowedError' || error.name === 'AbortError') return;
+        castStatus.textContent = 'No compatible TV was found. Check that your phone and TV can reach the selected Jellyfin server.';
+        castStatus.hidden = false;
     }
 }
 

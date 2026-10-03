@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jellyfin Contents</title>
-    <link rel="stylesheet" href="styles.css?v=cast-20261003">
+    <link rel="stylesheet" href="styles.css?v=cast-button-v2">
 </head>
 <body>
     <main class="container contents-page">
@@ -31,14 +31,15 @@
             <div class="player-heading">
                 <h2 id="player-title"></h2>
                 <button id="fullscreen-like-button" class="like-button fullscreen-like-button" type="button" aria-label="Like this film" aria-pressed="false" title="Like this film" hidden>♡</button>
-                <google-cast-launcher id="cast-launcher" class="cast-launcher" aria-label="Cast to TV" title="Cast to TV" hidden></google-cast-launcher>
+                <button id="cast-button" class="icon-button cast-button" type="button" aria-label="Cast video to TV" title="Cast video to TV">Cast</button>
                 <button id="close-player" class="icon-button" type="button" aria-label="Back to contents" title="Back to contents">&#8592;</button>
             </div>
+            <p id="cast-status" class="cast-status" role="status" aria-live="polite" hidden></p>
             <video id="media-player" controls playsinline x-webkit-airplay="allow"></video>
         </section>
         <button id="bottom-back-button" class="secondary-button bottom-back-button" type="button" title="Back">Back</button>
     </main>
-    <script src="contents.js?v=cast-20261003"></script>
+    <script src="contents.js?v=cast-button-v2"></script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </body>
 </html>
