@@ -20,7 +20,7 @@ body {
     background: radial-gradient(ellipse at 20% 0%, #202c3d 0, #111720 58%);
 }
 
-button, input, select { font: inherit; }
+button, input { font: inherit; }
 
 .container {
     width: min(100% - 40px, 1040px);
@@ -46,7 +46,7 @@ h1 { margin-bottom: 8px; font-size: 2.4rem; }
 }
 
 label { margin-top: 8px; color: #d6dfeb; font-size: .9rem; }
-#auth-form input, #jellyfin-server {
+input {
     width: 100%;
     min-height: 44px;
     padding: 10px 12px;

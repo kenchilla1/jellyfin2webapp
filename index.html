@@ -15,10 +15,7 @@
         </header>
         <form id="auth-form">
             <label for="jellyfin-server">Server address</label>
-            <select id="jellyfin-server" required>
-                <option value="https://xxx.1zero.org">xxx.1zero.org</option>
-                <option value="https://film.1zero.org">film.1zero.org</option>
-            </select>
+            <input type="url" id="jellyfin-server" autocomplete="url" required>
             <label for="username">Username</label>
             <input type="text" id="username" value="admin" autocomplete="username" required>
             <label for="password">Password</label>

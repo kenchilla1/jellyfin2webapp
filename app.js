@@ -1,8 +1,6 @@
 const authForm = document.getElementById('auth-form');
 const statusMessage = document.getElementById('connection-status');
-const serverSelect = document.getElementById('jellyfin-server');
-const matchingServer = [...serverSelect.options].find((option) => new URL(option.value).hostname === window.location.hostname);
-if (matchingServer) serverSelect.value = matchingServer.value;
+document.getElementById('jellyfin-server').value = window.location.origin;
 
 authForm.addEventListener('submit', async (event) => {
     event.preventDefault();
