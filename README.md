@@ -6,10 +6,19 @@ A static Jellyfin browser app served by Nginx. The container serves the app and 
 
 1. Add the extracted source files to a GitHub repository. Uploading the ZIP as a single file will not run the image-publishing workflow.
 2. On a push to the repository's default branch, GitHub Actions builds and publishes `ghcr.io/kenchilla1/jellyfin2webapp:latest`. In GitHub, make the resulting GHCR package public if Unraid should pull it without registry credentials.
-3. In Unraid, add a container using `ghcr.io/kenchilla1/jellyfin2webapp:latest`. Map container port `80` to host port `8080` (or another available port).
-4. Add the environment variable `JELLYFIN_SERVER` with value `http://192.168.1.155:6961`. Add `NGINX_ENVSUBST_FILTER` with value `^JELLYFIN_SERVER$`.
-5. Configure the HTTPS reverse proxy for `xxx.1zero.org` to forward to the Unraid host on port `8080`. Enable WebSocket support and terminate TLS at the reverse proxy.
-6. Open `https://xxx.1zero.org`. The sign-in form defaults to that site's origin and username `admin`; enter the Jellyfin password when signing in.
+3. After `App_icon.png` and `templates/my-jellyfin2webapp.xml` are committed to the public repository, copy the Unraid template onto the server from the Unraid terminal:
+
+```sh
+wget -O /boot/config/plugins/dockerMan/templates-user/my-jellyfin2webapp.xml https://raw.githubusercontent.com/kenchilla1/jellyfin2webapp/main/templates/my-jellyfin2webapp.xml
+```
+
+4. In Unraid's Docker tab, choose **Add Container** and select `jellyfin2webapp` from the template list. The template sets the container icon to the repository's `App_icon.png`, uses network `kjgproxy`, maps host port `6960` to container port `80`, and sets the Jellyfin proxy default.
+5. Configure the HTTPS reverse proxy for `xxx.1zero.org` to forward to the Unraid host on port `6960`. Enable WebSocket support and terminate TLS at the reverse proxy.
+6. Open `https://xxx.1zero.org` and sign in with the Jellyfin account. The password is not stored in the template.
+
+The app icon in each page header links back to the sign-in screen.
+
+Unraid reads the displayed container icon from its Docker template. Copying the PNG into the app image alone does not change the icon for an already-created container.
 
 The reverse proxy must send requests for this domain to the webapp container. The container serves known app files and forwards other paths to `JELLYFIN_SERVER`. Do not expose the container directly to the internet without the HTTPS reverse proxy.
 

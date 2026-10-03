@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jellyfin Contents</title>
-    <link rel="stylesheet" href="styles.css?v=cast-20261003">
+    <link rel="stylesheet" href="styles.css?v=app-icon-20261003">
 </head>
 <body>
     <main class="container contents-page">
         <header class="library-heading">
-            <div>
-                <nav id="breadcrumbs" class="breadcrumbs" aria-label="Breadcrumb"></nav>
-                <h1 id="contents-title">Contents</h1>
-                <p id="library-file-count" class="library-file-count" hidden></p>
+            <div class="library-brand">
+                <a class="brand-home" href="index.html" aria-label="Return to sign in">
+                    <img src="App_icon.png" alt="">
+                </a>
+                <div>
+                    <nav id="breadcrumbs" class="breadcrumbs" aria-label="Breadcrumb"></nav>
+                    <h1 id="contents-title">Contents</h1>
+                    <p id="library-file-count" class="library-file-count" hidden></p>
+                </div>
             </div>
             <button id="back-button" class="secondary-button" type="button" title="Back">Back</button>
         </header>

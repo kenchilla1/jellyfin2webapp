@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>jellyfin2webapp</Name>
+  <Repository>ghcr.io/kenchilla1/jellyfin2webapp:latest</Repository>
+  <Registry>https://github.com/kenchilla1/jellyfin2webapp</Registry>
+  <Network>kjgproxy</Network>
+  <MyIP></MyIP>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/kenchilla1/jellyfin2webapp</Support>
+  <Project>https://github.com/kenchilla1/jellyfin2webapp</Project>
+  <Overview>Browser-based Jellyfin viewer with an Nginx Jellyfin API proxy.</Overview>
+  <Category>MediaApp:Video</Category>
+  <WebUI>http://[IP]:[PORT:80]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/kenchilla1/jellyfin2webapp/main/templates/my-jellyfin2webapp.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/kenchilla1/jellyfin2webapp/main/App_icon.png</Icon>
+  <ExtraParams>--pids-limit=2048</ExtraParams>
+  <PostArgs></PostArgs>
+  <CPUset></CPUset>
+  <DonateText></DonateText>
+  <DonateLink></DonateLink>
+  <Config Name="Web UI Port" Target="80" Default="6960" Mode="tcp" Description="Port used to access the web app through your reverse proxy." Type="Port" Display="always" Required="true" Mask="false">6960</Config>
+  <Config Name="Jellyfin Server" Target="JELLYFIN_SERVER" Default="http://192.168.1.155:6961" Mode="" Description="Default Jellyfin server used by the Nginx proxy." Type="Variable" Display="always" Required="true" Mask="false">http://192.168.1.155:6961</Config>
+  <Config Name="Timezone" Target="TZ" Default="America/Chicago" Mode="" Description="Container timezone." Type="Variable" Display="always" Required="false" Mask="false">America/Chicago</Config>
+</Container>

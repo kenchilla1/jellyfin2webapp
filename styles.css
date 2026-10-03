@@ -29,6 +29,10 @@ button, input, select { font: inherit; }
 }
 
 .page-heading { margin: 0 auto 34px; text-align: center; }
+.brand-home { display: block; width: 56px; height: 56px; flex: 0 0 56px; overflow: hidden; border-radius: 8px; }
+.brand-home img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.brand-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.login-brand-home { margin: 0 auto 20px; }
 h1, h2, p { margin-top: 0; }
 h1 { margin-bottom: 8px; font-size: 2.4rem; }
 .eyebrow { margin-bottom: 12px; color: var(--accent); font-size: 1.08rem; font-weight: 700; }
@@ -73,6 +77,7 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .status.error { color: var(--danger); }
 
 .library-heading, .player-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.library-brand { display: flex; min-width: 0; align-items: center; gap: 14px; }
 .library-heading h1 { margin: 0; }
 .library-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .library-file-count { margin: 7px 0 0; color: var(--muted); font-size: .9rem; }
