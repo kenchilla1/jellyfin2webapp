@@ -5,8 +5,8 @@ const serverAddressPreview = document.getElementById('server-address-preview');
 const localModeButton = document.getElementById('local-mode');
 const remoteModeButton = document.getElementById('remote-mode');
 const usernameInput = document.getElementById('username');
-let connectionMode = 'remote';
-let defaultUsername = 'admin';
+let connectionMode = 'local';
+let defaultUsername = 'kenny';
 
 const jellyfinServers = {
     local: {

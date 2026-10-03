@@ -17,21 +17,21 @@
             <label for="jellyfin-server">Server</label>
             <select id="jellyfin-server" required>
                 <option value="film">film</option>
-                <option value="porn">porn</option>
+                <option value="porn" selected>porn</option>
             </select>
             <p id="server-address-preview" class="server-address-preview" aria-live="polite"></p>
             <div id="server-mode-controls" class="server-mode-controls" role="group" aria-label="Connection type">
-                <button id="local-mode" class="server-mode-button" type="button" aria-pressed="false">Local</button>
-                <button id="remote-mode" class="server-mode-button" type="button" aria-pressed="true">Remote</button>
+                <button id="local-mode" class="server-mode-button" type="button" aria-pressed="true">Local</button>
+                <button id="remote-mode" class="server-mode-button" type="button" aria-pressed="false">Remote</button>
             </div>
             <label for="username">Username</label>
-            <input type="text" id="username" value="admin" autocomplete="username" required>
+            <input type="text" id="username" value="kenny" autocomplete="username" required>
             <label for="password">Password</label>
             <input type="password" id="password" autocomplete="current-password" required>
             <button type="submit">Connect</button>
             <p id="connection-status" class="status" role="status" aria-live="polite"></p>
         </form>
     </main>
-    <script src="app.js?v=login-user-default-20261003"></script>
+    <script src="app.js?v=login-local-porn-kenny-20261003"></script>
 </body>
 </html>
