@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfin Contents</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container contents-page">
+        <header class="library-heading">
+            <div>
+                <nav id="breadcrumbs" class="breadcrumbs" aria-label="Breadcrumb"></nav>
+                <h1 id="contents-title">Contents</h1>
+                <p id="library-file-count" class="library-file-count" hidden></p>
+            </div>
+            <button id="back-button" class="secondary-button" type="button" title="Back">Back</button>
+        </header>
+        <div id="contents-sort-controls" class="contents-sort-controls" role="group" aria-label="Sort films and folders">
+            <label for="contents-sort-by">Sort by</label>
+            <select id="contents-sort-by">
+                <option value="SortName">Name</option>
+                <option value="DateCreated">File date</option>
+            </select>
+            <button id="contents-sort-order" class="secondary-button sort-order-button" type="button" aria-label="Sort ascending" title="Sort ascending">Ascending</button>
+        </div>
+        <p id="contents-status" class="status" role="status" aria-live="polite"></p>
+        <ul id="contents-list" class="item-list" aria-label="Folder contents"></ul>
+        <button id="load-more" class="secondary-button load-more-button" type="button" hidden>Load more</button>
+        <section id="player-section" class="player-section" hidden>
+            <div class="player-heading">
+                <h2 id="player-title"></h2>
+                <button id="fullscreen-like-button" class="like-button fullscreen-like-button" type="button" aria-label="Like this film" aria-pressed="false" title="Like this film" hidden>♡</button>
+                <button id="fullscreen-delete-button" class="icon-button fullscreen-delete-button" type="button" aria-label="Delete film from server" title="Delete film from server" hidden>&#128465;</button>
+                <button id="close-player" class="icon-button" type="button" aria-label="Close player" title="Close player">×</button>
+            </div>
+            <video id="media-player" controls playsinline></video>
+        </section>
+        <button id="bottom-back-button" class="secondary-button bottom-back-button" type="button" title="Back">Back</button>
+    </main>
+    <script src="contents.js"></script>
+</body>
+</html>

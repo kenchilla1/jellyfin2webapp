@@ -1,0 +1,9 @@
+services:
+  jellyfin-webapp:
+    build: .
+    ports:
+      - "${PORT:-8080}:80"
+    environment:
+      JELLYFIN_SERVER: ${JELLYFIN_SERVER:-http://192.168.1.155:6961}
+      NGINX_ENVSUBST_FILTER: '^JELLYFIN_SERVER$'
+    restart: unless-stopped

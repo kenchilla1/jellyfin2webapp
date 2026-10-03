@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfin Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header class="page-heading">
+            <p class="eyebrow">PERSONAL MEDIA</p>
+            <h1>Jellyfin</h1>
+            <p class="subtitle">Connect to your server</p>
+        </header>
+        <form id="auth-form">
+            <label for="jellyfin-server">Server address</label>
+            <input type="url" id="jellyfin-server" autocomplete="url" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" value="admin" autocomplete="username" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" required>
+            <button type="submit">Connect</button>
+            <p id="connection-status" class="status" role="status" aria-live="polite"></p>
+        </form>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

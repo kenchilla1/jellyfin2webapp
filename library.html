@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfin Library</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container library-page">
+        <header class="library-heading">
+            <div>
+                <p class="eyebrow">JELLYFIN</p>
+                <h1 id="library-title">Your libraries</h1>
+            </div>
+            <div class="library-header-actions">
+                <button id="toggle-progress-visibility" class="secondary-button" type="button" aria-pressed="true">Hide check marks</button>
+                <button id="back-button" class="secondary-button" type="button" title="Back">Back</button>
+            </div>
+        </header>
+        <label class="library-search-label" for="library-search">Search films</label>
+        <input id="library-search" class="library-search" type="search" placeholder="Search movie titles" autocomplete="off">
+        <section id="film-search-section" class="film-search-section" aria-live="polite" hidden>
+            <h2>Films</h2>
+            <p id="film-search-status" class="status"></p>
+            <ul id="film-search-results" class="item-list" aria-label="Film search results"></ul>
+        </section>
+        <p id="library-status" class="status" role="status" aria-live="polite"></p>
+        <ul id="library-list" class="library-list" aria-label="Libraries"></ul>
+    </main>
+    <script src="library.js"></script>
+</body>
+</html>

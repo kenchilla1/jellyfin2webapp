@@ -1,0 +1,8 @@
+.git
+.gitignore
+*.code-workspace
+*.zip
+README.md
+.github
+compose.yaml
+Dockerfile
