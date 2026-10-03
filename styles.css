@@ -150,9 +150,7 @@ input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); ou
 .player-heading h2 { flex: 1; margin: 0; }
 .icon-button { width: 40px; height: 40px; padding: 0; font-size: 1.4rem; cursor: pointer; }
 .fullscreen-like-button { position: static; flex: 0 0 42px; }
-.fullscreen-like-button[hidden], .fullscreen-delete-button[hidden] { display: none; }
-.fullscreen-delete-button { flex: 0 0 44px; border-color: #794c56; color: #ff9b91; font-size: 1.25rem; }
-.fullscreen-delete-button:hover { border-color: #ff6b71; background: #3a2029; color: #ffd7d4; }
+.fullscreen-like-button[hidden] { display: none; }
 video { display: block; width: 100%; max-height: 75vh; background: #050706; }
 .player-section[hidden] { display: none !important; }
 .player-section:fullscreen, .player-section.player-open { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 18px; border: 0; background: #090d13; }

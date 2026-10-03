@@ -34,7 +34,6 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         event.stopPropagation();
         if (currentMedia) toggleFavorite(currentMedia, event.currentTarget);
     });
-    document.getElementById('fullscreen-delete-button').addEventListener('click', deleteCurrentMedia);
     setSortOrder('Ascending');
     moreButton.addEventListener('click', () => loadContents(false));
     sortBySelect.addEventListener('change', () => loadContents(true));
@@ -542,7 +541,6 @@ function playMedia(media) {
     const fullscreenLikeButton = document.getElementById('fullscreen-like-button');
     updateLikeButton(fullscreenLikeButton, media);
     fullscreenLikeButton.hidden = false;
-    document.getElementById('fullscreen-delete-button').hidden = false;
     player.src = mediaUrl(media);
     document.getElementById('player-title').textContent = media.Name;
     playerSection.hidden = false;
@@ -571,35 +569,6 @@ function closePlayer() {
     currentMediaId = null;
     currentMedia = null;
     document.getElementById('fullscreen-like-button').hidden = true;
-    document.getElementById('fullscreen-delete-button').hidden = true;
-}
-
-async function deleteCurrentMedia() {
-    if (!currentMedia) return;
-    const media = currentMedia;
-    const confirmed = window.confirm(`Permanently delete "${media.Name}" and its file from the Jellyfin server? This cannot be undone.`);
-    if (!confirmed) return;
-
-    const deleteButton = document.getElementById('fullscreen-delete-button');
-    deleteButton.disabled = true;
-    try {
-        const response = await fetch(`${connection.server}/Items/${encodeURIComponent(media.Id)}`, {
-            method: 'DELETE',
-            headers: { Authorization: authorizationHeader() }
-        });
-        if (!response.ok) {
-            throw new Error(`Jellyfin could not delete this file (HTTP ${response.status}). Check the user's content deletion permission.`);
-        }
-        playableItems = playableItems.filter((item) => item.Id !== media.Id);
-        contentsList.querySelector(`[data-media-id="${CSS.escape(media.Id)}"]`)?.remove();
-        closePlayer();
-        statusMessage.classList.remove('error');
-        statusMessage.textContent = `Deleted "${media.Name}" from the server.`;
-    } catch (error) {
-        window.alert(error.message);
-    } finally {
-        deleteButton.disabled = false;
-    }
 }
 
 function handlePlayerKeydown(event) {
