@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jellyfin Viewer</title>
-    <link rel="stylesheet" href="styles.css?v=58149b7">
+    <link rel="stylesheet" href="styles.css?v=login-mode-20261003">
 </head>
 <body>
     <main class="container">
@@ -14,11 +14,16 @@
             <p class="subtitle">Connect to your server</p>
         </header>
         <form id="auth-form">
-            <label for="jellyfin-server">Server address</label>
+            <label for="jellyfin-server">Server</label>
             <select id="jellyfin-server" required>
-                <option value="https://xxx.1zero.org">xxx.1zero.org</option>
-                <option value="https://film.1zero.org">film.1zero.org</option>
+                <option value="film">film</option>
+                <option value="porn">porn</option>
             </select>
+            <p id="server-address-preview" class="server-address-preview" aria-live="polite"></p>
+            <div id="server-mode-controls" class="server-mode-controls" role="group" aria-label="Connection type">
+                <button id="local-mode" class="server-mode-button" type="button" aria-pressed="false">Local</button>
+                <button id="remote-mode" class="server-mode-button" type="button" aria-pressed="true">Remote</button>
+            </div>
             <label for="username">Username</label>
             <input type="text" id="username" value="admin" autocomplete="username" required>
             <label for="password">Password</label>
@@ -27,6 +32,6 @@
             <p id="connection-status" class="status" role="status" aria-live="polite"></p>
         </form>
     </main>
-    <script src="app.js?v=58149b7"></script>
+    <script src="app.js?v=login-mode-20261003"></script>
 </body>
 </html>
