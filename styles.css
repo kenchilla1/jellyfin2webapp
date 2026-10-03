@@ -155,6 +155,8 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .icon-button { width: 40px; height: 40px; padding: 0; font-size: 1.4rem; cursor: pointer; }
 .fullscreen-like-button { position: static; flex: 0 0 42px; }
 .fullscreen-like-button[hidden] { display: none; }
+.cast-launcher { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border: 1px solid #46566d; border-radius: 4px; background: var(--surface); color: #edf2f8; cursor: pointer; }
+.cast-launcher[hidden] { display: none; }
 video { display: block; width: 100%; max-height: 75vh; background: #050706; }
 .player-section[hidden] { display: none !important; }
 .player-section:fullscreen, .player-section.player-open { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 18px; border: 0; background: #090d13; }

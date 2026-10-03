@@ -15,6 +15,8 @@ The reverse proxy must send requests for this domain to the webapp container. Th
 
 The Jellyfin password is not stored in this repository or image. If a real password was shared while configuring this deployment, change it before exposing the service publicly.
 
+On supported Android browsers, the fullscreen player exposes Google Cast when a Cast receiver is available. On iPhone/iPad, use Safari's AirPlay control in the native video controls. The television must be able to reach the selected Jellyfin address.
+
 ## Local Docker
 
 ```sh

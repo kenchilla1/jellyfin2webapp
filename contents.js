@@ -21,6 +21,23 @@ let activePreview = null;
 let playableItems = [];
 let currentMediaId = null;
 let currentMedia = null;
+let castContext = null;
+
+window.__onGCastApiAvailable = (isAvailable) => {
+    if (!isAvailable || !window.cast?.framework) return;
+    const castFramework = window.cast.framework;
+    castContext = castFramework.CastContext.getInstance();
+    castContext.setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
+    document.getElementById('cast-launcher').hidden = false;
+    castContext.addEventListener(castFramework.CastContextEventType.SESSION_STATE_CHANGED, (event) => {
+        if ([castFramework.SessionState.SESSION_STARTED, castFramework.SessionState.SESSION_RESUMED].includes(event.sessionState)) {
+            castCurrentMedia();
+        }
+    });
+};
 
 if (!connection || (!parentId && !favoritesPage && !watchId)) {
     window.location.replace(connection ? 'library.html' : 'index.html');
@@ -487,6 +504,29 @@ function mediaUrl(media) {
     return `${connection.server}/Videos/${encodeURIComponent(media.Id)}/stream?static=true&api_key=${encodeURIComponent(connection.accessToken)}`;
 }
 
+async function castCurrentMedia() {
+    const session = castContext?.getCurrentSession();
+    if (!session || !currentMedia) return;
+
+    const player = document.getElementById('media-player');
+    const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl(currentMedia), 'video/mp4');
+    mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED;
+    const metadata = new chrome.cast.media.GenericMediaMetadata();
+    metadata.title = currentMedia.Name;
+    mediaInfo.metadata = metadata;
+    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+    request.autoplay = true;
+    request.currentTime = player.currentTime || 0;
+
+    try {
+        await session.loadMedia(request);
+        player.pause();
+    } catch {
+        statusMessage.textContent = 'Could not cast this film. Check that the TV can reach the selected Jellyfin server.';
+        statusMessage.classList.add('error');
+    }
+}
+
 function showPreview(media, card) {
     closePreview();
     const overlay = document.createElement('div');
@@ -554,7 +594,8 @@ function playMedia(media) {
     } else if (!wasFullscreen) {
         playerSection.classList.add('player-open');
     }
-    player.play().catch(() => {});
+    if (castContext?.getCurrentSession()) castCurrentMedia();
+    else player.play().catch(() => {});
 }
 
 function closePlayer() {
