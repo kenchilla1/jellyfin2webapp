@@ -164,8 +164,8 @@ async function loadWatchItem() {
         const film = result.Items[0];
         if (!film) throw new Error('This film could not be found.');
         document.getElementById('contents-title').textContent = film.Name;
-        contentsList.replaceChildren(createMediaCard(film));
-        statusMessage.textContent = film.Overview || '';
+        statusMessage.textContent = '';
+        playMedia(film);
     } catch (error) {
         statusMessage.textContent = error.message;
         statusMessage.classList.add('error');
