@@ -9,15 +9,14 @@
 <body>
     <main class="container">
         <header class="page-heading">
-            <p class="eyebrow">KG Presents</p>
-            <h1>Dirty Dog Productions</h1>
-            <p class="subtitle">Connect to your server</p>
+            <h1>Jellyfin Services</h1>
+            <p class="subtitle">Select server and location</p>
         </header>
         <form id="auth-form">
             <label for="jellyfin-server">Server</label>
             <select id="jellyfin-server" required>
-                <option value="film">film</option>
-                <option value="porn" selected>porn</option>
+                <option value="film">Film</option>
+                <option value="porn" selected>Alt. Film</option>
             </select>
             <p id="server-address-preview" class="server-address-preview" aria-live="polite"></p>
             <div id="server-mode-controls" class="server-mode-controls" role="group" aria-label="Connection type">
@@ -31,6 +30,7 @@
             <button type="submit">Connect</button>
             <p id="connection-status" class="status" role="status" aria-live="polite"></p>
         </form>
+        <p class="subtitle login-footer">KG Productions 2026</p>
     </main>
     <script src="app.js?v=login-local-porn-kenny-20261003"></script>
 </body>

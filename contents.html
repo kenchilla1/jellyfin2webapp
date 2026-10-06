@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jellyfin Contents</title>
-    <link rel="stylesheet" href="styles.css?v=rounded-ui-20261003">
+    <link rel="stylesheet" href="styles.css?v=toolbar-action-cluster-20261005">
 </head>
 <body>
     <main class="container contents-page">
@@ -35,15 +35,54 @@
         <section id="player-section" class="player-section" hidden>
             <div class="player-heading">
                 <h2 id="player-title"></h2>
-                <button id="fullscreen-like-button" class="like-button fullscreen-like-button" type="button" aria-label="Like this film" aria-pressed="false" title="Like this film" hidden>♡</button>
                 <google-cast-launcher id="cast-launcher" class="cast-launcher" aria-label="Cast to TV" title="Cast to TV" hidden></google-cast-launcher>
-                <button id="close-player" class="icon-button" type="button" aria-label="Back to contents" title="Back to contents">&#8592;</button>
             </div>
-            <video id="media-player" controls playsinline x-webkit-airplay="allow"></video>
+            <div id="player-stage" class="player-stage">
+                <video id="media-player" playsinline x-webkit-airplay="allow"></video>
+                <div id="playback-controls" class="playback-controls" role="group" aria-label="Tap playback controls">
+                    <button class="playback-button playback-seek playback-seek-long" type="button" data-seek="-60" aria-label="Back 60 seconds" title="Back 60 seconds">−60</button>
+                    <button class="playback-button playback-seek" type="button" data-seek="-15" aria-label="Back 15 seconds" title="Back 15 seconds">−15</button>
+                    <button id="playback-toggle" class="playback-button playback-toggle" type="button" aria-label="Pause" title="Pause">Ⅱ</button>
+                    <button class="playback-button playback-seek" type="button" data-seek="15" aria-label="Forward 15 seconds" title="Forward 15 seconds">+15</button>
+                    <button class="playback-button playback-seek playback-seek-long" type="button" data-seek="60" aria-label="Forward 60 seconds" title="Forward 60 seconds">+60</button>
+                </div>
+                <div id="playback-toolbar" class="playback-toolbar" role="group" aria-label="Playback toolbar">
+                    <button id="close-player" class="toolbar-button" type="button" aria-label="Back to contents" title="Back to contents">&#8592;</button>
+                    <button class="toolbar-button toolbar-seek-long" type="button" data-seek="-60" aria-label="Back 60 seconds" title="Back 60 seconds">−60</button>
+                    <button class="toolbar-button" type="button" data-seek="-15" aria-label="Back 15 seconds" title="Back 15 seconds">−15</button>
+                    <button id="toolbar-playback-toggle" class="toolbar-button toolbar-playback-toggle" type="button" aria-label="Pause" title="Pause">Ⅱ</button>
+                    <button class="toolbar-button" type="button" data-seek="15" aria-label="Forward 15 seconds" title="Forward 15 seconds">+15</button>
+                    <button class="toolbar-button toolbar-seek-long" type="button" data-seek="60" aria-label="Forward 60 seconds" title="Forward 60 seconds">+60</button>
+                    <div class="playback-timeline">
+                        <span id="playback-current-time" class="playback-time">0:00</span>
+                        <input id="playback-seekbar" class="playback-seekbar" type="range" min="0" max="1000" value="0" aria-label="Film position">
+                        <span id="playback-duration" class="playback-time">0:00</span>
+                    </div>
+                    <div class="toolbar-action-group">
+                        <div class="toolbar-track-control">
+                            <button id="audio-track-button" class="toolbar-button toolbar-track-trigger" type="button" aria-label="Choose audio track" title="Choose audio track" aria-haspopup="listbox" aria-expanded="false" disabled>♫</button>
+                            <div id="audio-track-menu" class="toolbar-track-popup" role="listbox" aria-label="Audio tracks" hidden></div>
+                            <select id="audio-stream-select" aria-label="Audio stream" hidden disabled>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+                        <div class="toolbar-track-control">
+                            <button id="subtitle-track-button" class="toolbar-button toolbar-track-trigger" type="button" aria-label="Choose subtitle track" title="Choose subtitle track" aria-haspopup="listbox" aria-expanded="false" disabled>CC</button>
+                            <div id="subtitle-track-menu" class="toolbar-track-popup" role="listbox" aria-label="Subtitle tracks" hidden></div>
+                            <select id="subtitle-stream-select" aria-label="Subtitle track" hidden disabled>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+                        <button id="fullscreen-like-button" class="like-button" type="button" aria-label="Like this film" aria-pressed="false" title="Like this film" hidden>♡</button>
+                        <button id="delete-media-button" class="toolbar-button toolbar-delete" type="button" aria-label="Delete this film from the server" title="Delete this film from the server">&#128465;</button>
+                    </div>
+                </div>
+            </div>
         </section>
         <button id="bottom-back-button" class="secondary-button bottom-back-button" type="button" title="Back">Back</button>
     </main>
-    <script src="contents.js?v=cast-20261003"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+    <script src="contents.js?v=copy-compatible-video-20261005"></script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </body>
 </html>

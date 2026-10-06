@@ -13,8 +13,8 @@ wget -O /boot/config/plugins/dockerMan/templates-user/my-jellyfin2webapp.xml htt
 ```
 
 4. In Unraid's Docker tab, choose **Add Container** and select `jellyfin2webapp` from the template list. The template sets the container icon to the repository's `App_icon.png`, uses network `kjgproxy`, maps host port `6960` to container port `80`, and sets the Jellyfin proxy default.
-5. Configure the HTTPS reverse proxy for `xxx.1zero.org` to forward to the Unraid host on port `6960`. Enable WebSocket support and terminate TLS at the reverse proxy.
-6. Open `https://xxx.1zero.org` and sign in with the Jellyfin account. The password is not stored in the template.
+5. Configure the HTTPS reverse proxy for `x2.1zero.org` to forward to the Unraid host on port `6960`. Enable WebSocket support and terminate TLS at the reverse proxy.
+6. Open `https://x2.1zero.org` and sign in with the Jellyfin account. The password is not stored in the template.
 
 The app icon in each page header links back to the sign-in screen.
 
