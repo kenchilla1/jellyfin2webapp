@@ -5,7 +5,12 @@ const serverAddressPreview = document.getElementById('server-address-preview');
 const localModeButton = document.getElementById('local-mode');
 const remoteModeButton = document.getElementById('remote-mode');
 const usernameInput = document.getElementById('username');
-let connectionMode = 'local';
+const passwordInput = document.getElementById('password');
+const rememberLoginInput = document.getElementById('remember-login');
+const loginStorageKey = 'jellyfinRememberedLogin';
+const manualLoginRequested = new URLSearchParams(window.location.search).get('manual') === '1';
+let rememberedLogin = readRememberedLogin();
+let connectionMode = ['local', 'remote'].includes(rememberedLogin?.mode) ? rememberedLogin.mode : 'local';
 let defaultUsername = 'kenny';
 
 const jellyfinServers = {
@@ -19,6 +24,49 @@ const jellyfinServers = {
     }
 };
 
+if (manualLoginRequested && rememberedLogin?.password) {
+    delete rememberedLogin.password;
+    try {
+        localStorage.setItem(loginStorageKey, JSON.stringify(rememberedLogin));
+    } catch {
+        localStorage.removeItem(loginStorageKey);
+    }
+}
+
+if (jellyfinServers[connectionMode][rememberedLogin?.server]) serverSelect.value = rememberedLogin.server;
+if (rememberedLogin?.username) {
+    usernameInput.value = rememberedLogin.username;
+    defaultUsername = rememberedLogin.username;
+}
+if (!manualLoginRequested && rememberedLogin?.password) {
+    passwordInput.value = rememberedLogin.password;
+    rememberLoginInput.checked = true;
+}
+
+function readRememberedLogin() {
+    try {
+        return JSON.parse(localStorage.getItem(loginStorageKey) || 'null');
+    } catch {
+        return null;
+    }
+}
+
+function persistLoginPreferences(savePassword = rememberLoginInput.checked) {
+    const storedLogin = {
+        mode: connectionMode,
+        server: serverSelect.value,
+        username: usernameInput.value.trim()
+    };
+    if (savePassword && passwordInput.value) storedLogin.password = passwordInput.value;
+    try {
+        localStorage.setItem(loginStorageKey, JSON.stringify(storedLogin));
+        rememberedLogin = storedLogin;
+    } catch {
+        statusMessage.textContent = 'Could not save login details in this browser.';
+        statusMessage.classList.add('error');
+    }
+}
+
 function updateServerSelection(mode = connectionMode) {
     connectionMode = mode;
     localModeButton.setAttribute('aria-pressed', String(mode === 'local'));
@@ -27,26 +75,36 @@ function updateServerSelection(mode = connectionMode) {
     const nextDefaultUsername = mode === 'local' && serverSelect.value === 'porn' ? 'kenny' : 'admin';
     if (usernameInput.value === defaultUsername) usernameInput.value = nextDefaultUsername;
     defaultUsername = nextDefaultUsername;
+    persistLoginPreferences();
 }
 
 serverSelect.addEventListener('change', () => updateServerSelection());
 localModeButton.addEventListener('click', () => updateServerSelection('local'));
 remoteModeButton.addEventListener('click', () => updateServerSelection('remote'));
+usernameInput.addEventListener('change', () => persistLoginPreferences());
+rememberLoginInput.addEventListener('change', () => {
+    if (!rememberLoginInput.checked) persistLoginPreferences(false);
+    else persistLoginPreferences(true);
+});
 updateServerSelection();
 
 authForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    await connect(false);
+});
 
+async function connect(isAutomatic) {
     const jellyfinUrl = jellyfinServers[connectionMode][serverSelect.value].replace(/\/+$/, '');
     const username = usernameInput.value.trim();
-    const password = document.getElementById('password').value;
+    const password = passwordInput.value;
     const submitButton = authForm.querySelector('button[type="submit"]');
 
     submitButton.disabled = true;
-    statusMessage.textContent = 'Connecting to Jellyfin...';
+    statusMessage.textContent = isAutomatic ? 'Signing in...' : 'Connecting to Jellyfin...';
     statusMessage.classList.remove('error');
     try {
         const session = await authenticateUser(jellyfinUrl, username, password);
+        persistLoginPreferences(rememberLoginInput.checked);
         sessionStorage.setItem('jellyfinConnection', JSON.stringify({
             server: jellyfinUrl,
             username,
@@ -55,11 +113,22 @@ authForm.addEventListener('submit', async (event) => {
         }));
         window.location.href = 'library.html';
     } catch (error) {
-        statusMessage.textContent = error.message;
+        if (isAutomatic) {
+            passwordInput.value = '';
+            persistLoginPreferences(false);
+            rememberLoginInput.checked = false;
+            statusMessage.textContent = 'Saved sign-in failed. Check your credentials and connect again.';
+        } else {
+            statusMessage.textContent = error.message;
+        }
         statusMessage.classList.add('error');
         submitButton.disabled = false;
     }
-});
+}
+
+if (!manualLoginRequested && rememberedLogin?.password && rememberedLogin?.username && jellyfinServers[connectionMode][serverSelect.value]) {
+    connect(true);
+}
 
 async function authenticateUser(server, username, password) {
     let response;

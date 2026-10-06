@@ -54,6 +54,8 @@ h1 { margin-bottom: 8px; font-size: 2.4rem; }
 }
 
 #auth-form label { margin-top: 12px; color: #d6dfeb; font-size: 1.35rem; }
+#auth-form .remember-login-option { display: flex; align-items: center; gap: 10px; margin-top: 2px; color: var(--muted); font-size: .95rem; cursor: pointer; }
+#auth-form .remember-login-option input { width: 19px; height: 19px; flex: 0 0 auto; margin: 0; accent-color: var(--accent); cursor: pointer; }
 #auth-form input, #jellyfin-server {
     width: 100%;
     min-height: 66px;

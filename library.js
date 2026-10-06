@@ -6,7 +6,7 @@ const searchSection = document.getElementById('film-search-section');
 const searchStatus = document.getElementById('film-search-status');
 const searchResults = document.getElementById('film-search-results');
 const progressStorageKey = `jellyfin-filtered-libraries:${connection?.server || 'server'}:${connection?.userId || 'user'}`;
-const progressVisibilityStorageKey = `${progressStorageKey}:visible`;
+const progressVisibilityStorageKey = `${progressStorageKey}:visible:v3`;
 let searchTimer;
 let searchRequestId = 0;
 
@@ -28,11 +28,11 @@ searchInput.addEventListener('input', () => {
 });
 
 if (!connection) {
-    window.location.replace('index.html');
+    window.location.replace('index.html?manual=1');
 } else {
-    document.getElementById('back-button').addEventListener('click', () => goBack('index.html'));
+    document.getElementById('back-button').addEventListener('click', () => goBack('index.html?manual=1'));
     const visibilityButton = document.getElementById('toggle-progress-visibility');
-    const marksVisible = localStorage.getItem(progressVisibilityStorageKey) !== 'false';
+    const marksVisible = localStorage.getItem(progressVisibilityStorageKey) === 'true';
     setProgressMarksVisible(marksVisible, visibilityButton);
     visibilityButton.addEventListener('click', () => {
         const visible = libraryList.classList.contains('progress-marks-hidden');

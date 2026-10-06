@@ -50,7 +50,7 @@ window.__onGCastApiAvailable = (isAvailable) => {
 };
 
 if (!connection || (!parentId && !favoritesPage && !watchId)) {
-    window.location.replace(connection ? 'library.html' : 'index.html');
+    window.location.replace(connection ? 'library.html' : 'index.html?manual=1');
 } else {
     document.getElementById('contents-title').textContent = pageTitle;
     renderBreadcrumbs();
@@ -172,7 +172,7 @@ function handleAuthenticationExpired() {
     if (authenticationExpired) return;
     authenticationExpired = true;
     sessionStorage.removeItem('jellyfinConnection');
-    window.location.replace('index.html');
+    window.location.replace('index.html?manual=1');
 }
 
 async function jellyfinGet(path) {
