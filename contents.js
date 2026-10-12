@@ -88,9 +88,11 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     playerStage.addEventListener('pointermove', (event) => {
         if (event.pointerType === 'mouse' || event.pointerType === 'touch') showPlaybackToolbar();
     });
+    playerStage.addEventListener('touchstart', showPlaybackToolbar, { passive: true });
+    playerStage.addEventListener('touchmove', showPlaybackToolbar, { passive: true });
     playerStage.addEventListener('click', (event) => {
         if (event.target !== player && event.target !== playerStage) return;
-        if (event.pointerType === 'touch') showPlaybackToolbar();
+        if (event.pointerType === 'touch' || window.matchMedia('(hover: none)').matches) showPlaybackToolbar();
         else toggleTapControls();
     });
     playbackControls.addEventListener('click', (event) => {
