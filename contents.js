@@ -89,7 +89,9 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         if (event.pointerType === 'mouse' || event.pointerType === 'touch') showPlaybackToolbar();
     });
     playerStage.addEventListener('click', (event) => {
-        if (event.target === player || event.target === playerStage) toggleTapControls();
+        if (event.target !== player && event.target !== playerStage) return;
+        if (event.pointerType === 'touch') showPlaybackToolbar();
+        else toggleTapControls();
     });
     playbackControls.addEventListener('click', (event) => {
         if (event.target === playbackControls) toggleTapControls();
