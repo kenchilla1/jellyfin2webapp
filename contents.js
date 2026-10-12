@@ -86,7 +86,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     audioStreamSelect.addEventListener('change', () => changeAudioStream(audioStreamSelect.value));
     subtitleStreamSelect.addEventListener('change', updateSubtitleTrack);
     playerStage.addEventListener('pointermove', (event) => {
-        if (event.pointerType === 'mouse') showPlaybackToolbar();
+        if (event.pointerType === 'mouse' || event.pointerType === 'touch') showPlaybackToolbar();
     });
     playerStage.addEventListener('click', (event) => {
         if (event.target === player || event.target === playerStage) toggleTapControls();
