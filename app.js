@@ -20,7 +20,7 @@ const jellyfinServers = {
     },
     remote: {
         film: 'https://film.1zero.org',
-        porn: 'https://x2.1zero.org'
+        porn: 'https://xcode.1zero.org'
     }
 };
 
