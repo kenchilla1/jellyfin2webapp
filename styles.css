@@ -21,6 +21,7 @@ body {
 }
 
 button, input, select { font: inherit; }
+.icon { display: block; width: 1em; height: 1em; fill: currentColor; }
 button { transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease; }
 button:enabled:hover { transform: translateY(-3px); box-shadow: 0 7px 16px rgb(0 0 0 / 28%); }
 
@@ -93,7 +94,7 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .library-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .library-file-count { margin: 7px 0 0; color: var(--muted); font-size: .9rem; }
 .library-file-count[hidden] { display: none; }
-.contents-sort-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 24px 0 12px; color: #d6dfeb; font-size: .9rem; }
+.contents-sort-controls { position: sticky; z-index: 10; top: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 24px -14px 12px; padding: 10px 14px; border-radius: 0 0 14px 14px; background: rgb(17 23 32 / 86%); color: #d6dfeb; font-size: .9rem; backdrop-filter: blur(10px); }
 .contents-sort-controls[hidden] { display: none; }
 .contents-sort-controls select { min-height: 40px; min-width: 150px; padding: 7px 32px 7px 10px; border: 1px solid #46566d; border-radius: 10px; background: var(--surface); color: #edf2f8; font: inherit; }
 .sort-order-button { min-width: 112px; }
@@ -163,6 +164,7 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .library-favorites-card { position: relative; }
 .library-favorites-card .library-favorites-mark { position: absolute; top: 10px; right: 10px; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: rgb(9 13 19 / 88%); color: #ff7eaa; font-size: 1.4rem; }
 .like-button { position: absolute; z-index: 2; top: 8px; right: 8px; display: grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid rgb(255 255 255 / 35%); border-radius: 50%; background: rgb(9 13 19 / 88%); color: #fff; font-size: 1.65rem; line-height: 1; cursor: pointer; }
+.like-button .icon { width: .82em; height: .82em; }
 .like-button[aria-pressed="true"] { color: #ff7eaa; }
 .like-button:hover { border-color: #ff7eaa; background: #111720; }
 .like-button:disabled { cursor: wait; opacity: .6; }
@@ -197,11 +199,14 @@ video { display: block; width: 100%; max-height: 75vh; background: #050706; }
 .playback-button.playback-toggle { width: clamp(62px, 10vw, 92px); border-color: #fff; background: #fff; color: #0b1018; font-size: clamp(1.4rem, 3.8vw, 2rem); }
 .playback-button.playback-toggle:hover { background: #dfe9f5; }
 .playback-button.playback-seek-long { width: clamp(42px, 6.5vw, 62px); font-size: clamp(.72rem, 1.8vw, .95rem); }
+.playback-button > .icon { width: 38%; height: 38%; }
 .playback-controls button:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .playback-toolbar { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 40px clamp(12px, 3vw, 36px) 14px; transform: translateY(8px); background: linear-gradient(transparent, rgb(0 0 0 / 85%)); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 .player-stage.toolbar-visible .playback-toolbar { transform: translateY(0); opacity: 1; pointer-events: auto; }
 .toolbar-button, .playback-toolbar .like-button { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 50%; background: rgb(255 255 255 / 12%); color: #fff; cursor: pointer; font-size: .76rem; font-weight: 700; }
 .playback-toolbar button:enabled:hover { transform: none; box-shadow: none; background: rgb(255 255 255 / 24%); }
+.toolbar-button > .icon { width: 18px; height: 18px; }
+.toolbar-button.toolbar-playback-toggle > .icon { width: 22px; height: 22px; }
 .toolbar-button.toolbar-seek-long { font-size: .66rem; }
 .toolbar-button.toolbar-playback-toggle { width: 46px; height: 46px; flex-basis: 46px; background: #fff; color: #0b1018; font-size: 1.15rem; }
 .playback-toolbar .toolbar-playback-toggle:enabled:hover { background: #dfe9f5; }
@@ -271,6 +276,7 @@ video { display: block; width: 100%; max-height: 75vh; background: #050706; }
     .toolbar-action-group { gap: 5px; }
     .toolbar-track-control { flex: 0 0 auto; }
     .toolbar-button.toolbar-track-trigger { width: 31px; height: 31px; flex-basis: 31px; font-size: .72rem; }
+    .toolbar-button > .icon { width: 16px; height: 16px; }
     .toolbar-track-popup { bottom: calc(100% + 8px); width: min(240px, 82vw); }
     .playback-toolbar .playback-timeline { gap: 8px; }
     .playback-time { min-width: 2.8em; font-size: .75rem; }
