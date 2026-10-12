@@ -43,6 +43,28 @@ if (!manualLoginRequested && rememberedLogin?.password) {
     rememberLoginInput.checked = true;
 }
 
+// Jellyfin tracks sessions and transcodes per device, so each browser needs its own ID.
+function getDeviceId() {
+    const storageKey = 'jellyfinDeviceId';
+    let deviceId = localStorage.getItem(storageKey);
+    if (!deviceId) {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        deviceId = `JellyfinViewer-${[...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+        localStorage.setItem(storageKey, deviceId);
+    }
+    return deviceId;
+}
+
+function getDeviceName() {
+    const userAgent = navigator.userAgent;
+    if (/Android/i.test(userAgent)) return 'Android Browser';
+    if (/iPhone|iPad|iPod/i.test(userAgent)) return 'iOS Browser';
+    if (/Windows/i.test(userAgent)) return 'Windows Browser';
+    if (/Macintosh/i.test(userAgent)) return 'Mac Browser';
+    if (/Linux/i.test(userAgent)) return 'Linux Browser';
+    return 'Browser';
+}
+
 function readRememberedLogin() {
     try {
         return JSON.parse(localStorage.getItem(loginStorageKey) || 'null');
@@ -109,7 +131,9 @@ async function connect(isAutomatic) {
             server: jellyfinUrl,
             username,
             userId: session.User.Id,
-            accessToken: session.AccessToken
+            accessToken: session.AccessToken,
+            deviceId: getDeviceId(),
+            deviceName: getDeviceName()
         }));
         window.location.href = 'library.html';
     } catch (error) {
@@ -137,7 +161,7 @@ async function authenticateUser(server, username, password) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'MediaBrowser Client="Jellyfin Viewer", Device="Browser", DeviceId="JellyfinViewer", Version="1.0.0"'
+                'Authorization': `MediaBrowser Client="Jellyfin Viewer", Device="${getDeviceName()}", DeviceId="${getDeviceId()}", Version="1.0.0"`
             },
             body: JSON.stringify({ Username: username, Pw: password })
         });

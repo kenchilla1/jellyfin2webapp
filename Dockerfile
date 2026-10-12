@@ -5,6 +5,7 @@ ENV JELLYFIN_SERVER=http://192.168.1.155:6961 \
 
 COPY index.html contents.html library.html styles.css app.js contents.js library.js /usr/share/nginx/html/
 COPY App_icon.png /usr/share/nginx/html/App_icon.png
+COPY vendor/ /usr/share/nginx/html/vendor/
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 
 EXPOSE 80

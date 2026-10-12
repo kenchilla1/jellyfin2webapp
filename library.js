@@ -59,7 +59,7 @@ async function jellyfinGet(path) {
 }
 
 function authorizationHeader() {
-    return `MediaBrowser Client="Jellyfin Viewer", Device="Browser", DeviceId="JellyfinViewer", Version="1.0.0", Token="${connection.accessToken}"`;
+    return `MediaBrowser Client="Jellyfin Viewer", Device="${connection.deviceName || 'Browser'}", DeviceId="${connection.deviceId || 'JellyfinViewer'}", Version="1.0.0", Token="${connection.accessToken}"`;
 }
 
 async function loadLibraries() {

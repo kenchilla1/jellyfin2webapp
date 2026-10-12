@@ -6,6 +6,7 @@ const favoritesPage = params.get('favorites') === 'true';
 const favoritesLibraryId = params.get('favoritesLibraryId');
 const pageTitle = params.get('title') || 'Contents';
 const libraryId = params.get('libraryId') || parentId;
+const deviceId = connection?.deviceId || 'JellyfinViewer';
 const libraryName = params.get('libraryName') || pageTitle;
 const statusMessage = document.getElementById('contents-status');
 const contentsList = document.getElementById('contents-list');
@@ -32,6 +33,9 @@ let hlsRecoveryAttempted = false;
 let currentPlaySessionId = null;
 let isSeeking = false;
 let authenticationExpired = false;
+let playbackReported = false;
+let playbackProgressInterval = null;
+let progressiveStartOffset = 0;
 
 window.__onGCastApiAvailable = (isAvailable) => {
     if (!isAvailable || !window.cast?.framework) return;
@@ -109,7 +113,12 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     });
     playbackToggle.addEventListener('click', togglePlayback);
     toolbarPlaybackToggle.addEventListener('click', togglePlayback);
-    player.addEventListener('playing', () => { hlsRecoveryAttempted = false; });
+    player.addEventListener('playing', () => {
+        hlsRecoveryAttempted = false;
+        startPlaybackReporting();
+    });
+    player.addEventListener('loadedmetadata', lockLandscapeForWideVideo);
+    window.addEventListener('pagehide', stopPlaybackReporting);
     document.querySelectorAll('#playback-controls [data-seek], #playback-toolbar [data-seek]').forEach((button) => {
         button.addEventListener('click', () => seekPlayer(Number(button.dataset.seek)));
     });
@@ -130,6 +139,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         toolbarPlaybackToggle.textContent = '▶';
         toolbarPlaybackToggle.setAttribute('aria-label', 'Play');
         toolbarPlaybackToggle.title = 'Play';
+        if (playbackReported) reportPlayback('/Progress');
         if (!document.getElementById('player-section').hidden && !playerStage.classList.contains('toolbar-visible')) {
             playerStage.classList.add('tap-controls-visible');
         }
@@ -175,7 +185,7 @@ function setSortOrder(order) {
 }
 
 function authorizationHeader() {
-    return `MediaBrowser Client="Jellyfin Viewer", Device="Browser", DeviceId="JellyfinViewer", Version="1.0.0", Token="${connection.accessToken}"`;
+    return `MediaBrowser Client="Jellyfin Viewer", Device="${connection.deviceName || 'Browser'}", DeviceId="${deviceId}", Version="1.0.0", Token="${connection.accessToken}"`;
 }
 
 function handleAuthenticationExpired() {
@@ -416,9 +426,14 @@ function createMediaCard(media) {
             playableItems.push(media);
         }
         if (media.Type === 'Movie' && Number(media.RunTimeTicks) > 0) {
-            button.addEventListener('pointerenter', () => showPreview(media, button));
+            // Previews stream the film, so only start them for mouse hover or keyboard focus.
+            button.addEventListener('pointerenter', (event) => {
+                if (event.pointerType === 'mouse') showPreview(media, button);
+            });
             button.addEventListener('pointerleave', () => closePreview(media.Id));
-            button.addEventListener('focus', () => showPreview(media, button));
+            button.addEventListener('focus', () => {
+                if (!isTouchDevice()) showPreview(media, button);
+            });
             button.addEventListener('blur', () => closePreview(media.Id));
         }
     }
@@ -637,15 +652,15 @@ function mediaUrl(media) {
     return `${connection.server}/Videos/${encodeURIComponent(media.Id)}/stream?static=true&api_key=${encodeURIComponent(connection.accessToken)}`;
 }
 
-function browserPlaybackUrl(media, audioStreamIndex = null, mediaSourceId = null) {
+function browserPlaybackUrl(media, audioStreamIndex = null, mediaSourceId = null, { segmentContainer = 'mp4', playSessionId = currentPlaySessionId } = {}) {
     const canCopyVideo = canCopyVideoForBrowser();
     const query = new URLSearchParams({
-        DeviceId: 'JellyfinViewer',
-        PlaySessionId: currentPlaySessionId || String(Date.now()),
+        DeviceId: deviceId,
+        PlaySessionId: playSessionId || String(Date.now()),
         AudioCodec: 'aac',
         AudioChannels: '2',
         MaxAudioChannels: '2',
-        SegmentContainer: 'mp4',
+        SegmentContainer: segmentContainer,
         AllowVideoStreamCopy: String(canCopyVideo),
         AllowAudioStreamCopy: 'true',
         api_key: connection.accessToken
@@ -679,6 +694,7 @@ function getBrowserVideoBitRate() {
 function loadBrowserPlayback(media, startPosition = 0, shouldResume = true) {
     const player = document.getElementById('media-player');
     const streamUrl = browserPlaybackUrl(media, selectedAudioStreamIndex, currentMediaSource?.Id || null);
+    progressiveStartOffset = 0;
     if (hlsPlayback) {
         hlsPlayback.destroy();
         hlsPlayback = null;
@@ -747,7 +763,7 @@ function loadProgressivePlayback(media, startPosition = 0, shouldResume = true) 
     const player = document.getElementById('media-player');
     const canCopyVideo = canCopyVideoForBrowser();
     const query = new URLSearchParams({
-        DeviceId: 'JellyfinViewer',
+        DeviceId: deviceId,
         PlaySessionId: currentPlaySessionId || String(Date.now()),
         AudioCodec: 'aac',
         AudioChannels: '2',
@@ -767,6 +783,8 @@ function loadProgressivePlayback(media, startPosition = 0, shouldResume = true) 
     if (selectedAudioStreamIndex !== null) query.set('AudioStreamIndex', String(selectedAudioStreamIndex));
     if (currentMediaSource?.Id) query.set('MediaSourceId', currentMediaSource.Id);
     if (startPosition > 0) query.set('StartTimeTicks', String(Math.floor(startPosition * 10000000)));
+    // A transcoded stream that starts mid-film reports currentTime from zero.
+    progressiveStartOffset = startPosition > 0 ? startPosition : 0;
     player.src = `${connection.server}/Videos/${encodeURIComponent(media.Id)}/stream?${query}`;
     player.load();
     if (shouldResume) player.play().catch(() => {});
@@ -880,6 +898,7 @@ function changeAudioStream(value) {
     const player = document.getElementById('media-player');
     const wasPlaying = !player.paused;
     const currentTime = player.currentTime || 0;
+    stopPlaybackReporting();
     selectedAudioStreamIndex = audioStreamIndex;
     currentPlaySessionId = String(Date.now());
     loadBrowserPlayback(media, currentTime, wasPlaying);
@@ -906,14 +925,19 @@ async function castCurrentMedia() {
     if (!session || !currentMedia) return;
 
     const player = document.getElementById('media-player');
-    const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl(currentMedia), 'video/mp4');
+    // Ask Jellyfin for an H.264/AAC HLS stream so files Chromecast can't decode directly (MKV, HEVC, DTS) still play.
+    const castUrl = browserPlaybackUrl(currentMedia, selectedAudioStreamIndex, currentMediaSource?.Id || null, {
+        segmentContainer: 'ts',
+        playSessionId: `cast-${Date.now()}`
+    });
+    const mediaInfo = new chrome.cast.media.MediaInfo(castUrl, 'application/x-mpegURL');
     mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED;
     const metadata = new chrome.cast.media.GenericMediaMetadata();
     metadata.title = currentMedia.Name;
     mediaInfo.metadata = metadata;
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
     request.autoplay = true;
-    request.currentTime = player.currentTime || 0;
+    request.currentTime = player.currentTime ? player.currentTime + progressiveStartOffset : getResumePosition(currentMedia);
 
     try {
         await session.loadMedia(request);
@@ -970,6 +994,7 @@ function closePreview(mediaId) {
 
 function playMedia(media) {
     closePreview();
+    stopPlaybackReporting();
     const player = document.getElementById('media-player');
     const playerSection = document.getElementById('player-section');
     const wasFullscreen = document.fullscreenElement === playerSection || playerSection.classList.contains('player-open');
@@ -988,6 +1013,7 @@ function playMedia(media) {
     currentMedia = media;
     currentPlaySessionId = String(Date.now());
     hlsRecoveryAttempted = false;
+    progressiveStartOffset = 0;
     document.getElementById('playback-seekbar').value = '0';
     document.getElementById('playback-current-time').textContent = '0:00';
     document.getElementById('playback-duration').textContent = formatPlaybackTime(Number(media.RunTimeTicks || 0) / 10000000);
@@ -1009,16 +1035,17 @@ function playMedia(media) {
     } else if (!wasFullscreen) {
         playerSection.classList.add('player-open');
     }
-    if (castContext?.getCurrentSession()) {
-        castCurrentMedia();
-        return;
-    }
     loadPlaybackTracks(media).then((mediaSource) => {
         if (authenticationExpired || currentMedia?.Id !== media.Id) return;
+        if (castContext?.getCurrentSession()) {
+            castCurrentMedia();
+            return;
+        }
+        const resumePosition = getResumePosition(media);
         if (mediaSource?.Id) {
-            loadBrowserPlayback(media);
+            loadBrowserPlayback(media, resumePosition);
         } else {
-            loadProgressivePlayback(media);
+            loadProgressivePlayback(media, resumePosition);
         }
     });
 }
@@ -1026,6 +1053,8 @@ function playMedia(media) {
 function closePlayer() {
     const player = document.getElementById('media-player');
     const playerSection = document.getElementById('player-section');
+    stopPlaybackReporting();
+    unlockOrientation();
     if (document.fullscreenElement === playerSection) document.exitFullscreen().catch(() => {});
     clearTimeout(playbackToolbarTimeout);
     playbackMetadataRequestId += 1;
@@ -1047,6 +1076,78 @@ function closePlayer() {
     currentMedia = null;
     currentPlaySessionId = null;
     document.getElementById('fullscreen-like-button').hidden = true;
+}
+
+function getResumePosition(media) {
+    return Number(media?.UserData?.PlaybackPositionTicks || 0) / 10000000;
+}
+
+function getPlaybackPositionTicks() {
+    const player = document.getElementById('media-player');
+    return Math.floor(((player.currentTime || 0) + progressiveStartOffset) * 10000000);
+}
+
+// Tell Jellyfin what is playing so it saves resume points and marks films as watched.
+function reportPlayback(endpoint, keepalive = false) {
+    if (!currentMedia || !currentPlaySessionId) return;
+    const player = document.getElementById('media-player');
+    fetch(`${connection.server}/Sessions/Playing${endpoint}`, {
+        method: 'POST',
+        keepalive,
+        headers: {
+            Authorization: authorizationHeader(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            ItemId: currentMedia.Id,
+            MediaSourceId: currentMediaSource?.Id || currentMedia.Id,
+            PlaySessionId: currentPlaySessionId,
+            PositionTicks: getPlaybackPositionTicks(),
+            IsPaused: player.paused,
+            CanSeek: true,
+            PlayMethod: 'Transcode',
+            AudioStreamIndex: selectedAudioStreamIndex ?? undefined
+        })
+    }).catch(() => {});
+}
+
+function startPlaybackReporting() {
+    if (playbackReported || !currentMedia) return;
+    playbackReported = true;
+    reportPlayback('');
+    clearInterval(playbackProgressInterval);
+    playbackProgressInterval = setInterval(() => reportPlayback('/Progress'), 10000);
+}
+
+function stopPlaybackReporting() {
+    clearInterval(playbackProgressInterval);
+    playbackProgressInterval = null;
+    if (!playbackReported || !currentMedia) return;
+    playbackReported = false;
+    const positionTicks = getPlaybackPositionTicks();
+    reportPlayback('/Stopped', true);
+    // Keep the local copy in step so reopening the film on this page resumes from here.
+    const runTimeTicks = Number(currentMedia.RunTimeTicks || 0);
+    currentMedia.UserData = currentMedia.UserData || {};
+    currentMedia.UserData.PlaybackPositionTicks = runTimeTicks && positionTicks > runTimeTicks * 0.9 ? 0 : positionTicks;
+}
+
+function lockLandscapeForWideVideo() {
+    const player = document.getElementById('media-player');
+    if (!isTouchDevice() || !document.fullscreenElement || player.videoWidth < player.videoHeight) return;
+    try {
+        screen.orientation?.lock?.('landscape')?.catch(() => {});
+    } catch {
+        // Orientation lock is unsupported on this browser.
+    }
+}
+
+function unlockOrientation() {
+    try {
+        screen.orientation?.unlock?.();
+    } catch {
+        // Orientation lock is unsupported on this browser.
+    }
 }
 
 function isTouchDevice() {

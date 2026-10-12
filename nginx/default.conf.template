@@ -15,6 +15,12 @@ server {
     index index.html;
     client_max_body_size 100m;
 
+    # Vendored libraries carry their version in the filename, so they can be cached.
+    location ^~ /vendor/ {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        try_files $uri =404;
+    }
+
     location ~* \.(?:html|js|css)$ {
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
         try_files $uri =404;
