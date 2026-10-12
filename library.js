@@ -237,14 +237,19 @@ function createFilmResult(film) {
     button.type = 'button';
     button.className = 'media-button';
     button.setAttribute('aria-label', `Open ${film.Name}`);
+    const frame = document.createElement('span');
+    frame.className = 'poster-frame';
+    frame.dataset.initial = film.Name.trim().charAt(0).toUpperCase();
     const poster = document.createElement('img');
     poster.alt = '';
     poster.loading = 'lazy';
+    poster.addEventListener('error', () => { poster.hidden = true; });
     poster.src = `${connection.server}/Items/${encodeURIComponent(film.Id)}/Images/Primary?api_key=${encodeURIComponent(connection.accessToken)}&maxWidth=420`;
-    poster.addEventListener('error', () => poster.remove(), { once: true });
+    frame.appendChild(poster);
     const title = document.createElement('span');
+    title.className = 'media-title';
     title.textContent = film.Name;
-    button.append(poster, title);
+    button.append(frame, title);
     button.addEventListener('click', () => {
         const params = new URLSearchParams({ watchId: film.Id, title: film.Name });
         window.location.href = `contents.html?${params}`;

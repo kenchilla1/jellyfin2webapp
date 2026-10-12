@@ -76,6 +76,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     player.addEventListener('durationchange', updatePlaybackTimeline);
     playbackSeekbar.addEventListener('input', () => {
         isSeeking = true;
+        updateSeekbarFill(playbackSeekbar);
         const duration = getPlaybackDuration();
         if (duration > 0) {
             const target = duration * Number(playbackSeekbar.value) / Number(playbackSeekbar.max);
@@ -371,18 +372,15 @@ function createLibraryFavoritesCard(count) {
     button.type = 'button';
     button.className = 'media-button folder-button library-favorites-card';
     button.setAttribute('aria-label', `Open ${libraryName} favorites`);
-    const poster = document.createElement('img');
-    poster.alt = '';
-    poster.loading = 'lazy';
-    poster.src = `${connection.server}/Items/${encodeURIComponent(libraryId)}/Images/Primary?api_key=${encodeURIComponent(connection.accessToken)}&maxWidth=420`;
-    poster.addEventListener('error', () => poster.remove(), { once: true });
+    const { frame } = createPoster(libraryId, '♥');
     const title = document.createElement('span');
+    title.className = 'media-title';
     title.textContent = count ? `Favorites (${count})` : 'Favorites';
     const heart = document.createElement('span');
     heart.className = 'library-favorites-mark';
     heart.setAttribute('aria-hidden', 'true');
     heart.textContent = '♥';
-    button.append(poster, title, heart);
+    button.append(frame, title, heart);
     button.addEventListener('click', () => {
         const favoritesParams = new URLSearchParams({
             parentId: libraryId,
@@ -406,15 +404,12 @@ function createMediaCard(media) {
     button.className = 'media-button';
     button.title = media.IsFolder ? `Open ${media.Name}` : `Play ${media.Name}`;
 
-    const poster = document.createElement('img');
-    poster.alt = '';
-    poster.loading = 'lazy';
-    poster.src = `${connection.server}/Items/${encodeURIComponent(media.Id)}/Images/Primary?api_key=${encodeURIComponent(connection.accessToken)}&maxWidth=420`;
-    poster.addEventListener('error', () => poster.remove(), { once: true });
+    const { frame, poster } = createPoster(media.Id, media.Name);
 
     const title = document.createElement('span');
+    title.className = 'media-title';
     title.textContent = media.Name;
-    button.append(poster, title);
+    button.append(frame, title);
     const isFolder = media.IsFolder || media.Type === 'Folder';
     const isVideo = media.MediaType === 'Video' && !isFolder;
     if (isFolder) {
@@ -444,6 +439,21 @@ function createMediaCard(media) {
         item.appendChild(createLikeButton(media));
     }
     return item;
+}
+
+// Posters sit in a fixed-ratio frame that shows the title's initial until (or unless) the image loads.
+function createPoster(itemId, label) {
+    const frame = document.createElement('span');
+    frame.className = 'poster-frame';
+    frame.dataset.initial = label.trim().charAt(0).toUpperCase();
+    const poster = document.createElement('img');
+    poster.alt = '';
+    poster.loading = 'lazy';
+    poster.addEventListener('error', () => { poster.hidden = true; });
+    poster.addEventListener('load', () => { poster.hidden = false; });
+    poster.src = `${connection.server}/Items/${encodeURIComponent(itemId)}/Images/Primary?api_key=${encodeURIComponent(connection.accessToken)}&maxWidth=420`;
+    frame.appendChild(poster);
+    return { frame, poster };
 }
 
 function createArtworkEditor(media, poster) {
@@ -1015,6 +1025,7 @@ function playMedia(media) {
     hlsRecoveryAttempted = false;
     progressiveStartOffset = 0;
     document.getElementById('playback-seekbar').value = '0';
+    updateSeekbarFill(document.getElementById('playback-seekbar'));
     document.getElementById('playback-current-time').textContent = '0:00';
     document.getElementById('playback-duration').textContent = formatPlaybackTime(Number(media.RunTimeTicks || 0) / 10000000);
     const fullscreenLikeButton = document.getElementById('fullscreen-like-button');
@@ -1237,9 +1248,14 @@ function updatePlaybackTimeline() {
     const currentTime = Number.isFinite(player.currentTime) ? player.currentTime : 0;
     if (!isSeeking) {
         seekbar.value = String(duration > 0 ? Math.round(currentTime / duration * Number(seekbar.max)) : 0);
+        updateSeekbarFill(seekbar);
         document.getElementById('playback-current-time').textContent = formatPlaybackTime(currentTime);
     }
     document.getElementById('playback-duration').textContent = formatPlaybackTime(duration);
+}
+
+function updateSeekbarFill(seekbar) {
+    seekbar.style.setProperty('--progress', `${Number(seekbar.value) / Number(seekbar.max) * 100}%`);
 }
 
 function formatPlaybackTime(seconds) {
