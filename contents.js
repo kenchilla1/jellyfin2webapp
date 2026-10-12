@@ -116,6 +116,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         toolbarPlaybackToggle.setAttribute('aria-label', 'Pause');
         toolbarPlaybackToggle.title = 'Pause';
         playerStage.classList.remove('tap-controls-visible');
+        if (window.matchMedia('(hover: none)').matches) showPlaybackToolbar();
     });
     player.addEventListener('pause', () => {
         playbackToggle.textContent = '▶';
@@ -1045,9 +1046,11 @@ function closePlayer() {
 
 function showPlaybackToolbar() {
     const playerStage = document.getElementById('player-stage');
+    const player = document.getElementById('media-player');
     playerStage.classList.remove('tap-controls-visible');
     playerStage.classList.add('toolbar-visible');
     clearTimeout(playbackToolbarTimeout);
+    if (window.matchMedia('(hover: none)').matches && !player.paused) return;
     playbackToolbarTimeout = setTimeout(() => playerStage.classList.remove('toolbar-visible'), 5000);
 }
 
