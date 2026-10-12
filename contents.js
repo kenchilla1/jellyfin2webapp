@@ -86,14 +86,16 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     audioStreamSelect.addEventListener('change', () => changeAudioStream(audioStreamSelect.value));
     subtitleStreamSelect.addEventListener('change', updateSubtitleTrack);
     playerStage.addEventListener('pointermove', (event) => {
-        if (event.pointerType === 'mouse' || event.pointerType === 'touch') showPlaybackToolbar();
+        if (event.pointerType === 'mouse') showPlaybackToolbar();
     });
-    playerStage.addEventListener('touchstart', showPlaybackToolbar, { passive: true });
-    playerStage.addEventListener('touchmove', showPlaybackToolbar, { passive: true });
     playerStage.addEventListener('click', (event) => {
         if (event.target !== player && event.target !== playerStage) return;
-        if (event.pointerType === 'touch' || window.matchMedia('(hover: none)').matches) showPlaybackToolbar();
-        else toggleTapControls();
+        if (event.pointerType === 'touch' || isTouchDevice()) {
+            if (playerStage.classList.contains('toolbar-visible')) hidePlaybackToolbar();
+            else showPlaybackToolbar();
+        } else {
+            toggleTapControls();
+        }
     });
     playbackControls.addEventListener('click', (event) => {
         if (event.target === playbackControls) toggleTapControls();
@@ -101,7 +103,10 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
     });
     playbackControls.addEventListener('pointerdown', (event) => event.stopPropagation());
     playbackToolbar.addEventListener('click', (event) => event.stopPropagation());
-    playbackToolbar.addEventListener('pointerdown', (event) => event.stopPropagation());
+    playbackToolbar.addEventListener('pointerdown', (event) => {
+        event.stopPropagation();
+        showPlaybackToolbar();
+    });
     playbackToggle.addEventListener('click', togglePlayback);
     toolbarPlaybackToggle.addEventListener('click', togglePlayback);
     player.addEventListener('playing', () => { hlsRecoveryAttempted = false; });
@@ -116,7 +121,7 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         toolbarPlaybackToggle.setAttribute('aria-label', 'Pause');
         toolbarPlaybackToggle.title = 'Pause';
         playerStage.classList.remove('tap-controls-visible');
-        if (window.matchMedia('(hover: none)').matches) showPlaybackToolbar();
+        if (isTouchDevice()) showPlaybackToolbar();
     });
     player.addEventListener('pause', () => {
         playbackToggle.textContent = '▶';
@@ -1044,14 +1049,36 @@ function closePlayer() {
     document.getElementById('fullscreen-like-button').hidden = true;
 }
 
+function isTouchDevice() {
+    return window.matchMedia('(hover: none)').matches;
+}
+
 function showPlaybackToolbar() {
     const playerStage = document.getElementById('player-stage');
-    const player = document.getElementById('media-player');
     playerStage.classList.remove('tap-controls-visible');
     playerStage.classList.add('toolbar-visible');
+    schedulePlaybackToolbarHide();
+}
+
+function schedulePlaybackToolbarHide() {
     clearTimeout(playbackToolbarTimeout);
-    if (window.matchMedia('(hover: none)').matches && !player.paused) return;
-    playbackToolbarTimeout = setTimeout(() => playerStage.classList.remove('toolbar-visible'), 5000);
+    playbackToolbarTimeout = setTimeout(() => {
+        const player = document.getElementById('media-player');
+        const trackMenuOpen = [...document.querySelectorAll('.toolbar-track-popup')].some((menu) => !menu.hidden);
+        // Keep the toolbar up while the viewer is using it, or while paused on touch screens.
+        if (isSeeking || trackMenuOpen || (player.paused && isTouchDevice())) {
+            schedulePlaybackToolbarHide();
+            return;
+        }
+        hidePlaybackToolbar();
+    }, isTouchDevice() ? 3500 : 5000);
+}
+
+function hidePlaybackToolbar() {
+    clearTimeout(playbackToolbarTimeout);
+    document.querySelectorAll('.toolbar-track-popup').forEach((menu) => { menu.hidden = true; });
+    document.querySelectorAll('.toolbar-track-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
+    document.getElementById('player-stage').classList.remove('toolbar-visible');
 }
 
 function toggleTapControls() {
