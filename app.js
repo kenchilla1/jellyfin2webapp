@@ -179,3 +179,5 @@ async function authenticateUser(server, username, password) {
     }
     return result;
 }
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

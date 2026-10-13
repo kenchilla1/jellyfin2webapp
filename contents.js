@@ -36,6 +36,7 @@ let authenticationExpired = false;
 let playbackReported = false;
 let playbackProgressInterval = null;
 let progressiveStartOffset = 0;
+let playerHistoryEntry = false;
 // SVG icons render the same on every platform, unlike text symbols that some phones draw as emoji.
 const icons = {
     play: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -169,6 +170,11 @@ if (!connection || (!parentId && !favoritesPage && !watchId)) {
         loadContents(true);
     });
     document.addEventListener('keydown', handlePlayerKeydown);
+    window.addEventListener('popstate', () => {
+        if (!playerHistoryEntry) return;
+        playerHistoryEntry = false;
+        closePlayer();
+    });
     document.addEventListener('fullscreenchange', () => {
         const playerSection = document.getElementById('player-section');
         if (!playerSection.hidden && !document.fullscreenElement && !playerSection.classList.contains('player-open')) {
@@ -1044,7 +1050,13 @@ function playMedia(media) {
     document.getElementById('player-title').textContent = media.Name;
     playerSection.hidden = false;
     if (!wasFullscreen) playerSection.classList.remove('player-open');
-    if (!wasFullscreen && typeof playerSection.requestFullscreen === 'function') {
+    if (!wasFullscreen && isAppFullscreen()) {
+        // The installed app already fills the screen, so skip the Fullscreen API and the browser's
+        // "swipe to exit" notice it triggers. A history entry lets the back gesture close the player.
+        playerSection.classList.add('player-open');
+        history.pushState({ player: true }, '');
+        playerHistoryEntry = true;
+    } else if (!wasFullscreen && typeof playerSection.requestFullscreen === 'function') {
         try {
             playerSection.requestFullscreen().catch(() => playerSection.classList.add('player-open'));
         } catch {
@@ -1073,6 +1085,10 @@ function closePlayer() {
     const playerSection = document.getElementById('player-section');
     stopPlaybackReporting();
     unlockOrientation();
+    if (playerHistoryEntry) {
+        playerHistoryEntry = false;
+        history.back();
+    }
     if (document.fullscreenElement === playerSection) document.exitFullscreen().catch(() => {});
     clearTimeout(playbackToolbarTimeout);
     playbackMetadataRequestId += 1;
@@ -1152,7 +1168,7 @@ function stopPlaybackReporting() {
 
 function lockLandscapeForWideVideo() {
     const player = document.getElementById('media-player');
-    if (!isTouchDevice() || !document.fullscreenElement || player.videoWidth < player.videoHeight) return;
+    if (!isTouchDevice() || !(document.fullscreenElement || isAppFullscreen()) || player.videoWidth < player.videoHeight) return;
     try {
         screen.orientation?.lock?.('landscape')?.catch(() => {});
     } catch {
@@ -1166,6 +1182,10 @@ function unlockOrientation() {
     } catch {
         // Orientation lock is unsupported on this browser.
     }
+}
+
+function isAppFullscreen() {
+    return window.matchMedia('(display-mode: fullscreen)').matches;
 }
 
 function isTouchDevice() {
@@ -1279,3 +1299,4 @@ function goBack(fallback) {
     if (window.history.length > 1) window.history.back();
     else window.location.href = fallback;
 }
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});

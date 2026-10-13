@@ -21,6 +21,12 @@ server {
         try_files $uri =404;
     }
 
+    location = /manifest.webmanifest {
+        types { application/manifest+json webmanifest; }
+        add_header Cache-Control "no-cache" always;
+        try_files $uri =404;
+    }
+
     location ~* \.(?:html|js|css)$ {
         add_header Cache-Control "no-store, no-cache, must-revalidate" always;
         try_files $uri =404;

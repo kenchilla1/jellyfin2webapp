@@ -263,3 +263,5 @@ function goBack(fallback) {
     else window.location.href = fallback;
 }
 
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
